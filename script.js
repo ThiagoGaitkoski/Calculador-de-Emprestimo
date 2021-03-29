@@ -86,5 +86,51 @@ function getLenders(amount, apr, years, zipcode){
     "&yrs=" + encodeURIComponent(years) +
     "&zip=" + encodeURIComponent(zipcode);
 
-    
+    //Busca o conteúdo da URL usando o objeto XMLHttpRequest
+    var req = new XMLHttpRequest(); //Inicia novo pedido
+    req.open("GET", url) //Um pedido GET da HTTP para o url
+    req.send(null); //Envia o pedido sem corpo
+
+    //Antes de retornar, registra uma função de rotina de tratamento de evento
+    //que será chamada posteriormente,quando a resposta do servidor HTTP chegar.
+    req.onreadystatechange = function(){
+        if(req.readyState == 4 && req.status == 200){
+            //Se chegar aqui, obteve uma resposta HTTP válida e completa
+            var response = req.responseText; //Resposta HTTP como string
+            var lenders = JSON.parse(response); //Analisa em um array JS
+
+            //Converte o array em uma string HTML
+            var list = "";
+            for(var i = 0; i < lenders.length; i++){
+                list += "<li><a href='" + lenders[i].url + "'>" + lenders[i].name + "</a>"
+            }
+
+            //Exibe o código HTML no elemento acima
+            ad.innerHTML = "<ul>" + list + "</ul>";
+        }
+    }
+}
+
+//Faz o gráfico do saldo devedor mensal, dos juros e do capital no elemento <canvas>
+//Se for chamado sem argumentos, basta apagar qualquewr gráfico desenhado anteriormente.
+function chart(principal, interest, monthly, payments){
+    var graph = document.getElementById("graph"); //Obtém o <canvas>
+    graph.width = graph.width; //Apagar e redefinir o elemento canvas
+
+    //Se chamamos sem argumento/navegador nao suporta
+    //basta retornar agora
+    if(arguments.length == 0 || !graph.getContext) return;
+
+    //Obtem o objeto "contexto" de <canvas> que define a API de desenho
+    var g = graph.getContext("2d"); //Todo desenho é feito com esse objeto
+    var width = graph.width, height = graph. height; //Obtem tamanho da tela de desenho
+
+    //Essas funções convertem números de pagamento e valores monetário em pixels
+    function paymentToX(n){
+        return n * width/payments;
+    }
+
+    function amountToY(a){
+        return height-(a * height/(monthly * payments * 1.05))
+    }
 }
